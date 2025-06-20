@@ -3,13 +3,13 @@
 import React from 'react';
 
 const psalms = [
-  { ref: "Salmo 23:1", text: "El Señor es mi pastor, nada me falta." },
-  { ref: "Salmo 91:1", text: "El que habita al abrigo del Altísimo morará bajo la sombra del Omnipotente." },
-  { ref: "Salmo 121:1-2", text: "Alzaré mis ojos a los montes; ¿de dónde vendrá mi socorro? Mi socorro viene de Jehová, que hizo los cielos y la tierra." },
-  { ref: "Proverbios 3:5-6", text: "Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia. Reconócelo en todos tus caminos, y él enderezará tus veredas." },
-  { ref: "Filipenses 4:13", text: "Todo lo puedo en Cristo que me fortalece." },
-  { ref: "Isaías 41:10", text: "No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia." },
-  { ref: "Josué 1:9", text: "Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas."}
+  { ref: "Salmo 23:1", text: 'El Señor es mi pastor, nada me falta.' },
+  { ref: "Salmo 91:1", text: 'El que habita al abrigo del Altísimo morará bajo la sombra del Omnipotente.' },
+  { ref: "Salmo 121:1-2", text: 'Alzaré mis ojos a los montes; ¿de dónde vendrá mi socorro? Mi socorro viene de Jehová, que hizo los cielos y la tierra.' },
+  { ref: "Proverbios 3:5-6", text: 'Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia. Reconócelo en todos tus caminos, y él enderezará tus veredas.' },
+  { ref: "Filipenses 4:13", text: 'Todo lo puedo en Cristo que me fortalece.' },
+  { ref: "Isaías 41:10", text: 'No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia.' },
+  { ref: "Josué 1:9", text: 'Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.'}
 ];
 
 const VerseOfTheDay = () => {

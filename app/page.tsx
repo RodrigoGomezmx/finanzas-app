@@ -63,7 +63,7 @@ export default function Home() {
         const response = await fetch('/api/expenses');
         const data = await response.json();
         if (Array.isArray(data)) {
-          const parsedExpenses = data.map((expense: any) => ({
+          const parsedExpenses = data.map((expense: Expense) => ({
             id: expense.id,
             amount: expense.amount,
             concept: expense.concept,

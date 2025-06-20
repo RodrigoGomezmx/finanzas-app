@@ -27,7 +27,7 @@ const VerseOfTheDay = () => {
       </h2>
       <div>
         <h3 className="font-semibold text-gray-800 dark:text-gray-200">{dailyVerse.ref}</h3>
-        <p className="text-gray-600 dark:text-gray-400 italic">&quot;{dailyVerse.text}&quot;</p>
+        <p className="text-gray-600 dark:text-gray-400 italic">{dailyVerse.text}</p>
       </div>
     </div>
   );

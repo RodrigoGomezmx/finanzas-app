@@ -64,8 +64,11 @@ export default function Home() {
         const data = await response.json();
         if (Array.isArray(data)) {
           const parsedExpenses = data.map((expense: any) => ({
-            ...expense,
+            id: expense.id,
+            amount: expense.amount,
+            concept: expense.concept,
             date: new Date(expense.date),
+            weekNumber: expense.weekNumber,
             year: new Date(expense.date).getFullYear()
           }));
           setExpenses(parsedExpenses);
@@ -90,7 +93,7 @@ export default function Home() {
     // We calculate all excesses at once and update the state if needed.
     const allKnownWeeks = [...new Set(expenses.map(e => `${e.year}-${e.weekNumber}`))];
     let needsUpdate = false;
-    let newExpenses = [...expenses];
+    const newExpenses = [...expenses];
 
     allKnownWeeks.forEach(weekStr => {
       const [year, week] = weekStr.split('-').map(Number);
@@ -139,7 +142,7 @@ export default function Home() {
     if (needsUpdate) {
       setExpenses(newExpenses);
     }
-  }, [expenses]);
+  }, [expenses, getBudgetForWeek]);
 
   const expensesThisWeek = expenses.filter(
     (e) => e.weekNumber === currentDate.week && e.year === currentDate.year

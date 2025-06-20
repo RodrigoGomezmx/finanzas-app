@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# sveltekit
+.svelte-kit/
+build/
+
+# Private files
+servidores y passwordss/

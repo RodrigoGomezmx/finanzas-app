@@ -30,8 +30,11 @@ export default function WeeklyExpenses() {
         const data = await response.json();
         if (Array.isArray(data)) {
           const parsedExpenses = data.map((expense: any) => ({
-            ...expense,
-            date: new Date(expense.date)
+            id: expense.id,
+            amount: expense.amount,
+            concept: expense.concept,
+            date: new Date(expense.date),
+            weekNumber: expense.weekNumber
           }));
           setExpenses(parsedExpenses);
         } else {
@@ -51,7 +54,7 @@ export default function WeeklyExpenses() {
 
   // Calcular excedentes y agregarlos a la siguiente semana
   useEffect(() => {
-    let updatedExpenses = [...expenses];
+    const updatedExpenses = [...expenses];
     for (let week = 1; week <= TOTAL_WEEKS - 1; week++) {
       const weekExpenses = updatedExpenses.filter(e => e.weekNumber === week);
       const totalSpent = weekExpenses.reduce((sum, e) => sum + e.amount, 0);

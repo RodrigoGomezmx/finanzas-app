@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Finanzas App",
   description: "Control de gastos personales",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

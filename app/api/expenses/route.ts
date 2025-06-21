@@ -1,56 +1,75 @@
 import { NextResponse } from 'next/server';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
-
 if (!uri) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local or in your deployment settings');
+  throw new Error('Falta la variable de entorno MONGODB_URI');
 }
 
-const client = new MongoClient(uri);
+async function connectToDbAndCollection() {
+  const client = new MongoClient(uri!);
+  await client.connect();
+  const db = client.db('finanzas-app');
+  return { client, collection: db.collection('expenses') };
+}
 
-export async function GET() {
+// Obtener gastos (puede filtrar por semana: /api/expenses?week=2024-23)
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const week = searchParams.get('week');
+  const query = week ? { week } : {};
+  
+  const { client, collection } = await connectToDbAndCollection();
   try {
-    await client.connect();
-    const database = client.db('finanzas-app');
-    const expenses = database.collection('expenses');
-    const result = await expenses.find({}).toArray();
-    return NextResponse.json(result);
+    const expenses = await collection.find(query).toArray();
+    return NextResponse.json(expenses);
   } catch (error) {
     console.error('Error al obtener gastos:', error);
-    return NextResponse.json([]);
+    return NextResponse.json({ message: 'Error al obtener gastos' }, { status: 500 });
   } finally {
     await client.close();
   }
 }
 
+// Crear un nuevo gasto
 export async function POST(request: Request) {
+  const { client, collection } = await connectToDbAndCollection();
   try {
     const expense = await request.json();
-    await client.connect();
-    const database = client.db('finanzas-app');
-    const expenses = database.collection('expenses');
-    const result = await expenses.insertOne(expense);
-    return NextResponse.json(result);
+    // MongoDB usa _id, no id. Lo quitamos si viene del frontend.
+    delete expense._id; 
+    delete expense.id;
+    
+    const result = await collection.insertOne(expense);
+    return NextResponse.json({ ...expense, _id: result.insertedId }, { status: 201 });
   } catch (error) {
-    console.error('Error al guardar gasto:', error);
-    return NextResponse.json({ error: 'Error al guardar gasto' }, { status: 500 });
+    console.error('Error al crear el gasto:', error);
+    return NextResponse.json({ message: 'Error al crear el gasto' }, { status: 500 });
   } finally {
     await client.close();
   }
 }
 
+// Eliminar un gasto
 export async function DELETE(request: Request) {
+  const { client, collection } = await connectToDbAndCollection();
   try {
     const { id } = await request.json();
-    await client.connect();
-    const database = client.db('finanzas-app');
-    const expenses = database.collection('expenses');
-    const result = await expenses.deleteOne({ id });
-    return NextResponse.json(result);
+    if (!id) {
+      return NextResponse.json({ message: 'Se requiere el ID del gasto' }, { status: 400 });
+    }
+    
+    // El ID en la base de datos es un ObjectId, no un string.
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ message: 'Gasto no encontrado' }, { status: 404 });
+    }
+    
+    return NextResponse.json({ message: 'Gasto eliminado' });
   } catch (error) {
-    console.error('Error al eliminar gasto:', error);
-    return NextResponse.json({ error: 'Error al eliminar gasto' }, { status: 500 });
+    console.error('Error al eliminar el gasto:', error);
+    return NextResponse.json({ message: 'Error al eliminar el gasto' }, { status: 500 });
   } finally {
     await client.close();
   }

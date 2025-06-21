@@ -9,7 +9,8 @@ import WeeklySummary from './components/WeeklySummary';
 import VerseOfTheDay from './components/VerseOfTheDay';
 
 interface Expense {
-  id: string;
+  _id?: string; // ID de MongoDB (opcional)
+  id?: string; // Usado para lógica interna/keys (opcional)
   amount: number;
   concept: string;
   date: Date;
@@ -53,6 +54,77 @@ export default function Home() {
         }
       });
       setBudgetOverrides(newOverrides);
+    }
+  };
+
+  const fetchExpensesForWeek = async (week: number, year: number) => {
+    try {
+      const response = await fetch(`/api/expenses?week=${year}-${String(week).padStart(2, '0')}`);
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        const parsedExpenses = data.map((expense: any) => ({
+          ...expense,
+          date: new Date(expense.date),
+        }));
+        // Update only the expenses for the relevant week, preserving others
+        setExpenses(prev => [...prev.filter(e => e.weekNumber !== week || e.year !== year), ...parsedExpenses]);
+      } else {
+        console.error('API response is not an array:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+    }
+  };
+
+  const handleAddExpense = async (expense: Omit<Expense, 'id' | '_id' | 'date'>) => {
+    const newExpenseData = {
+      ...expense,
+      date: new Date(),
+    };
+
+    try {
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newExpenseData),
+      });
+
+      if (response.ok) {
+        // On success, re-fetch expenses for the current week to get the final state from DB
+        fetchExpensesForWeek(currentDate.week, currentDate.year);
+      } else {
+        console.error("Failed to save expense, server responded with an error.");
+        // Optional: show an error message to the user
+      }
+    } catch (error) {
+      console.error('Failed to add expense:', error);
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    const originalExpenses = [...expenses];
+    // Optimistic update: remove the expense from the UI immediately
+    setExpenses(expenses.filter(e => e._id !== id));
+
+    try {
+      const response = await fetch(`/api/expenses`, { // URL corregida
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }), // 'id' enviado en el cuerpo
+      });
+
+      if (response.ok) {
+        // La eliminación fue exitosa en el backend.
+        // Opcional: podríamos re-sincronizar, pero la UI ya está actualizada.
+        // Por ahora, un log es suficiente.
+        console.log("Gasto eliminado exitosamente.");
+      } else {
+        // Si falla, revertimos el cambio en la UI
+        setExpenses(originalExpenses);
+      }
+    } catch (error) {
+      console.error('Failed to delete expense:', error);
+      setExpenses(originalExpenses); // Revertir también si la petición fetch falla
     }
   };
 
@@ -151,50 +223,9 @@ export default function Home() {
   const spentAmount = expensesThisWeek.reduce((sum, e) => sum + e.amount, 0);
   const remainingAmount = budgetForThisWeek - spentAmount;
 
-  const handleAddExpense = async (expense: Omit<Expense, 'id' | 'date'>) => {
-    const newExpense = {
-      ...expense,
-      id: Date.now().toString(),
-      date: new Date(),
-      year: expense.year,
-    };
-    setExpenses([...expenses, newExpense]); // Optimistic update
-
-    try {
-      const response = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newExpense),
-      });
-      if (!response.ok) {
-        // Revert on failure
-        setExpenses(expenses.filter(e => e.id !== newExpense.id));
-      }
-    } catch (error) {
-      console.error('Failed to add expense:', error);
-      // Revert on failure
-      setExpenses(expenses.filter(e => e.id !== newExpense.id));
-    }
-  };
-
-  const handleDeleteExpense = async (id: string) => {
-    const originalExpenses = expenses;
-    setExpenses(expenses.filter(e => e.id !== id)); // Optimistic update
-
-    try {
-      const response = await fetch('/api/expenses', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      if (!response.ok) {
-        setExpenses(originalExpenses); // Revert on failure
-      }
-    } catch (error) {
-      console.error('Failed to delete expense:', error);
-      setExpenses(originalExpenses); // Revert on failure
-    }
-  };
+  useEffect(() => {
+    fetchExpensesForWeek(currentDate.week, currentDate.year);
+  }, [currentDate]);
 
   if (isLoading) {
     return (

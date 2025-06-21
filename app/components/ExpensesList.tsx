@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface Expense {
-  id: string;
+  _id?: string;
+  id?: string;
   amount: number;
   concept: string;
   date: Date;
@@ -16,7 +17,7 @@ interface ExpensesListProps {
   expenses: Expense[];
   weekNumber: number;
   year: number;
-  onAddExpense: (expense: Omit<Expense, 'id' | 'date'>) => void;
+  onAddExpense: (expense: Omit<Expense, 'id' | '_id' | 'date'>) => void;
   onDeleteExpense: (id: string) => void;
 }
 
@@ -80,7 +81,7 @@ const ExpensesList: React.FC<ExpensesListProps> = ({ expenses, weekNumber, year,
       <div>
         {expenses.length === 0 && <p className="text-center text-gray-400 py-4">No hay gastos esta semana.</p>}
         {expenses.map((expense) => (
-          <div key={expense.id} className="flex justify-between items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+          <div key={expense._id || expense.id} className="flex justify-between items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
             <div>
               <p className="font-semibold text-gray-800 dark:text-gray-200">{expense.concept}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(expense.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' })}</p>
@@ -90,7 +91,7 @@ const ExpensesList: React.FC<ExpensesListProps> = ({ expenses, weekNumber, year,
                 {formatCurrency(expense.amount * -1)}
               </span>
               <PencilIcon className="h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600 dark:hover:text-gray-200" />
-              <button onClick={() => onDeleteExpense(expense.id)}>
+              <button onClick={() => onDeleteExpense(expense._id!)}>
                 <TrashIcon className="h-5 w-5 text-gray-400 cursor-pointer hover:text-red-500 dark:hover:text-red-400" />
               </button>
             </div>

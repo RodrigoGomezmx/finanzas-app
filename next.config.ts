@@ -6,7 +6,22 @@ const withPWA = require('next-pwa')({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  runtimeCaching,
+  runtimeCaching: [
+    {
+      urlPattern: /^https?:\/\/.*/,
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'all-requests',
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+  ],
 });
 
 const nextConfig = {

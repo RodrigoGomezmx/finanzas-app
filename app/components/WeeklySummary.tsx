@@ -3,7 +3,8 @@
 import React from 'react';
 
 interface Expense {
-  id: string;
+  _id?: string;
+  id?: string;
   amount: number;
   concept: string;
   date: Date;

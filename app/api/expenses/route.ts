@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri!);
+
+if (!uri) {
+  throw new Error('Please define the MONGODB_URI environment variable inside .env.local or in your deployment settings');
+}
+
+const client = new MongoClient(uri);
 
 export async function GET() {
   try {
